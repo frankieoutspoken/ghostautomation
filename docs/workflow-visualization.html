@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ghost Automation Workflows - Pretty Perspectives</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #fafafa;
+      min-height: 100vh;
+      color: #1a1a1a;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 60px 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+
+    .logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.9rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #999;
+      margin-bottom: 15px;
+    }
+
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3rem;
+      font-weight: 400;
+      margin-bottom: 10px;
+      color: #1a1a1a;
+      letter-spacing: 1px;
+    }
+
+    .subtitle {
+      color: #888;
+      font-size: 0.95rem;
+      font-weight: 300;
+      letter-spacing: 1px;
+    }
+
+    /* Tab Navigation */
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 50px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid #e5e5e5;
+      padding-bottom: 20px;
+    }
+
+    .tab-btn {
+      padding: 12px 28px;
+      border: 1px solid #e5e5e5;
+      border-radius: 0;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+      background: #fff;
+      color: #666;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .tab-btn:hover {
+      background: #1a1a1a;
+      color: #fff;
+      border-color: #1a1a1a;
+    }
+
+    .tab-btn.active {
+      background: #1a1a1a;
+      color: #fff;
+      border-color: #1a1a1a;
+    }
+
+    .tab-btn .emoji {
+      margin-right: 8px;
+    }
+
+    /* Workflow Panels */
+    .workflow-panel {
+      display: none;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .workflow-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Flow Container */
+    .flow-container {
+      position: relative;
+      padding: 40px 0;
+    }
+
+    /* Flow Stages */
+    .flow-stages {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .flow-stage {
+      flex: 1;
+      min-width: 200px;
+      max-width: 280px;
+    }
+
+    .stage-header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .stage-icon {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      margin: 0 auto 15px;
+      border: 2px solid #e5e5e5;
+      background: #fff;
+      transition: all 0.3s ease;
+    }
+
+    .stage-icon.source { border-color: #d4a5a5; background: #fdf6f6; }
+    .stage-icon.process { border-color: #a5b8d4; background: #f6f8fd; }
+    .stage-icon.agent { border-color: #d4c5a5; background: #fdfbf6; }
+    .stage-icon.output { border-color: #a5d4b8; background: #f6fdf8; }
+
+    .stage-title {
+      font-size: 0.7rem;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 500;
+    }
+
+    /* Cards */
+    .card {
+      background: #fff;
+      border-radius: 0;
+      padding: 25px;
+      margin-bottom: 15px;
+      border: 1px solid #e5e5e5;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      border-color: #d4a5a5;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
+      transform: translateY(-3px);
+    }
+
+    .card-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.25rem;
+      font-weight: 500;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #1a1a1a;
+    }
+
+    .card-desc {
+      font-size: 0.85rem;
+      color: #666;
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    /* Flow Arrows */
+    .flow-arrow {
+      display: none;
+    }
+
+    @media (min-width: 900px) {
+      .flow-arrow {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 40px;
+        margin-top: 120px;
+      }
+
+      .arrow {
+        width: 40px;
+        height: 1px;
+        background: #d4a5a5;
+        position: relative;
+      }
+
+      .arrow::after {
+        content: '';
+        position: absolute;
+        right: -6px;
+        top: -4px;
+        border: 4px solid transparent;
+        border-left: 6px solid #d4a5a5;
+      }
+    }
+
+    /* Tools Grid */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 8px;
+      margin-top: 15px;
+    }
+
+    .tool-item {
+      background: #fafafa;
+      padding: 12px 8px;
+      font-size: 0.75rem;
+      text-align: center;
+      transition: all 0.2s ease;
+      border: 1px solid #e5e5e5;
+      color: #666;
+      letter-spacing: 0.5px;
+    }
+
+    .tool-item:hover {
+      background: #1a1a1a;
+      color: #fff;
+      border-color: #1a1a1a;
+    }
+
+    .tool-item .icon {
+      display: block;
+      font-size: 1.1rem;
+      margin-bottom: 5px;
+    }
+
+    /* Schedule Badge */
+    .schedule-badge {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #fff;
+      border: 1px solid #d4a5a5;
+      font-size: 0.75rem;
+      color: #996666;
+      margin-bottom: 30px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* Data Flow Section */
+    .data-flow {
+      margin-top: 60px;
+      padding: 40px;
+      background: #fff;
+      border: 1px solid #e5e5e5;
+    }
+
+    .data-flow h3 {
+      text-align: center;
+      margin-bottom: 40px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.8rem;
+      font-weight: 400;
+    }
+
+    .services-row {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .service-box {
+      text-align: center;
+      padding: 30px 25px;
+      background: #fafafa;
+      min-width: 150px;
+      transition: all 0.3s ease;
+      border: 1px solid #e5e5e5;
+    }
+
+    .service-box:hover {
+      border-color: #d4a5a5;
+      transform: translateY(-3px);
+    }
+
+    .service-box .icon {
+      font-size: 2rem;
+      margin-bottom: 15px;
+    }
+
+    .service-box .name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-bottom: 5px;
+    }
+
+    .service-box .desc {
+      font-size: 0.75rem;
+      color: #888;
+      letter-spacing: 0.5px;
+    }
+
+    .connector {
+      font-size: 1.2rem;
+      color: #d4a5a5;
+    }
+
+    /* Blocklist */
+    .blocklist {
+      margin-top: 40px;
+      padding: 25px;
+      background: #fdf6f6;
+      border: 1px solid #e8d4d4;
+    }
+
+    .blocklist h4 {
+      color: #996666;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 500;
+    }
+
+    .blocklist-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .blocklist-item {
+      padding: 6px 12px;
+      background: #fff;
+      border: 1px solid #e8d4d4;
+      font-size: 0.75rem;
+      color: #996666;
+    }
+
+    /* Command Line */
+    .command-box {
+      background: #1a1a1a;
+      padding: 25px 30px;
+      margin-top: 30px;
+      font-family: 'Monaco', 'Menlo', monospace;
+    }
+
+    .command-line {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .command-line:last-child {
+      margin-bottom: 0;
+    }
+
+    .prompt {
+      color: #d4a5a5;
+    }
+
+    .command {
+      color: #fff;
+    }
+
+    .comment {
+      color: #666;
+      font-size: 0.8rem;
+    }
+
+    /* Animation for flow items */
+    .animate-flow {
+      animation: flowIn 0.5s ease forwards;
+      opacity: 0;
+    }
+
+    @keyframes flowIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .flow-stage:nth-child(1) .card { animation-delay: 0.1s; }
+    .flow-stage:nth-child(3) .card { animation-delay: 0.2s; }
+    .flow-stage:nth-child(5) .card { animation-delay: 0.3s; }
+    .flow-stage:nth-child(7) .card { animation-delay: 0.4s; }
+
+    /* Section Divider */
+    .divider {
+      width: 60px;
+      height: 1px;
+      background: #d4a5a5;
+      margin: 40px auto;
+    }
+
+    /* List styling */
+    .card ul {
+      margin-top: 12px;
+      padding-left: 0;
+      list-style: none;
+    }
+
+    .card ul li {
+      padding: 6px 0;
+      padding-left: 15px;
+      position: relative;
+      color: #666;
+      font-size: 0.85rem;
+    }
+
+    .card ul li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      width: 6px;
+      height: 1px;
+      background: #d4a5a5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">Style Me Pretty</div>
+      <h1>Pretty Perspectives</h1>
+      <p class="subtitle">Content Automation Workflows</p>
+    </header>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="daily">
+        <span class="emoji">&#9673;</span>Daily
+      </button>
+      <button class="tab-btn" data-tab="weekly">
+        <span class="emoji">&#9673;</span>Weekly
+      </button>
+      <button class="tab-btn" data-tab="manual">
+        <span class="emoji">&#9673;</span>Manual
+      </button>
+      <button class="tab-btn" data-tab="overview">
+        <span class="emoji">&#9673;</span>Overview
+      </button>
+    </div>
+
+    <!-- Daily Workflow -->
+    <div class="workflow-panel active" id="daily">
+      <div style="text-align: center;">
+        <span class="schedule-badge">Runs Daily at 9:00 AM</span>
+      </div>
+
+      <div class="flow-container">
+        <div class="flow-stages">
+          <div class="flow-stage">
+            <div class="stage-header">
+              <div class="stage-icon source">&#128193;</div>
+              <div class="stage-title">Sources</div>
+            </div>
+            <div class="card animate-flow">
+              <div class="card-title">Interviews Folder</div>
+              <div class="card-desc">Google Drive folder containing vendor interview documents</div>
+            </div>
+            <div class="card animate-flow">
+              <div class="card-title">Ideas Folder</div>
+              <div class="card-desc">Topic ideas like "Piece on AI - look for interview quotes"</div>
+            </div>
+          </div>
+
+          <div class="flow-arrow"><div class="arrow"></div></div>
+
+          <div class="flow-stage">
+            <div class="stage-header">
+              <div class="stage-icon process">&#128269;</div>
+              <div class="stage-title">Filter</div>
+            </div>
+            <div class="card animate-flow">
+              <div class="card-title">Compare with Ghost</div>
+              <div class="card-desc">Check existing drafts & published articles to skip duplicates</div>
+            </div>
+            <div class="card animate-flow">
+              <div class="card-title">Find New Items</div>
+              <div class="card-desc">Only process interviews and ideas not yet in Ghost</div>
+            </div>
+          </div>
+
+          <div class="flow-arrow"><div class="arrow"></div></div>
+
+          <div class="flow-stage">
+            <div class="stage-header">
+              <div class="stage-icon agent">&#10022;</div>
+              <div class="stage-title">Agent</div>
+            </div>
+            <div class="card animate-flow">
+              <div class="card-title">Content Agent</div>
+              <div class="card-desc">Claude-powered agent that autonomously:</div>
+              <div class="tools-grid">
+                <div class="tool-item"><span class="icon">&#128270;</span>Research</div>
+                <div class="tool-item"><span class="icon">&#128214;</span>Read</div>
+                <div class="tool-item"><span class="icon">&#9998;</span>Generate</div>
+                <div class="tool-item"><span class="icon">&#128190;</span>Save</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flow-arrow"><div class="arrow"></div></div>
+
+          <div class="flow-stage">
+            <div class="stage-header">
+              <div class="stage-icon output">&#128196;</div>
+              <div class="stage-title">Output</div>
+            </div>
+            <div class="card animate-flow">
+              <div class="card-title">Ghost Drafts</div>
+              <div class="card-desc">New articles saved as drafts, ready for review and publishing</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="command-box">
+        <div class="command-line">
+          <span class="prompt">$</span>
+          <span class="command">npm run daily</span>
+        </div>
+        <div class="comment"># Checks for new interviews and ideas, creates drafts</div>
+      </div>
+    </div>
+
+    <!-- Weekly Workflow -->
+    <div class="workflow-panel" id="weekly">
+      <div style="text-align: center;">
+        <span class="schedule-badge">Runs Every Monday at 9:00 AM</span>
+      </div>
+
+      <div class="flow-container">
+        <div class="flow-stages">
+          <div class="flow-stage">
+            <div class="stage-header">
+              <div class="stage-icon source">&#128202;</div>
+              <div class="stage-title">Rotation</div>
+            </div>
+            <div class="card animate-flow">
+              <div class="card-title">Week Counter</div>
+              <div class="card-desc">Tracks week number to rotate between different content types and topics</div>
+            </div>
+          </div>
+
+          <div class="flow-arrow"><div class="arrow"></div></div>
+
+          <div class="flow-stage">
+            <div class="stage-header">
+              <div class="stage-icon process">&#128221;</div>
+              <div class="stage-title">Article Types</div>
+            </div>
+            <div class="card animate-flow" style="border-left: 2px solid #d4a5a5;">
+              <div class="card-title">SEO Article</div>
+              <div class="card-desc">Research current trends via Tavily, AI suggests timely topic</div>
+            </div>
+            <div class="card animate-flow" style="border-left: 2px solid #a5b8d4;">
+              <div class="card-title">Theme Article</div>
+              <div class="card-desc">Analyze all interviews to find common themes, write roundup</div>
+            </div>
+            <div class="card animate-flow" style="border-left: 2px solid #a5d4b8;">
+              <div class="card-title">Interview Profile</div>
+              <div class="card-desc">Process any new, unprocessed interview into a profile article</div>
+            </div>
+          </div>
+
+          <div class="flow-arrow"><div class="arrow"></div></div>
+
+          <div class="flow-stage">
+            <div class="stage-header">
+              <div class="stage-icon agent">&#10003;</div>
+              <div class="stage-title">Validation</div>
+            </div>
+            <div class="card animate-flow">
+              <div class="card-title">Duplicate Check</div>
+              <div class="card-desc">Skip if similar topic already exists in Ghost</div>
+            </div>
+            <div class="card animate-flow">
+              <div class="card-title">Generate HTML</div>
+              <div class="card-desc">Pretty Perspectives format with TL;DR, sections, CTAs</div>
+            </div>
+          </div>
+
+          <div class="flow-arrow"><div class="arrow"></div></div>
+
+          <div class="flow-stage">
+            <div class="stage-header">
+              <div class="stage-icon output">&#128196;</div>
+              <div class="stage-title">Output</div>
+            </div>
+            <div class="card animate-flow">
+              <div class="card-title">Up to 3 Drafts</div>
+              <div class="card-desc">SEO + Theme + Interview articles ready for review</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="command-box">
+        <div class="command-line">
+          <span class="prompt">$</span>
+          <span class="command">npm run weekly</span>
+        </div>
+        <div class="comment"># Generates SEO, theme roundup, and interview articles</div>
+      </div>
+    </div>
+
+    <!-- Manual Chat Workflow -->
+    <div class="workflow-panel" id="manual">
+      <div style="text-align: center;">
+        <span class="schedule-badge">Interactive CLI - Run Anytime</span>
+      </div>
+
+      <div class="flow-container">
+        <div class="flow-stages">
+          <div class="flow-stage">
+            <div class="stage-header">
+              <div class="stage-icon source">&#128172;</div>
+              <div class="stage-title">Request</div>
+            </div>
+            <div class="card animate-flow">
+              <div class="card-title">Natural Language</div>
+              <div class="card-desc">Example requests:</div>
+              <ul>
+                <li>"List all interviews"</li>
+                <li>"Create an article from the Nigel interview"</li>
+                <li>"Write an SEO article about wedding AI trends"</li>
+                <li>"What articles do we have about pricing?"</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="flow-arrow"><div class="arrow"></div></div>
+
+          <div class="flow-stage" style="flex: 2; max-width: 400px;">
+            <div class="stage-header">
+              <div class="stage-icon agent">&#10022;</div>
+              <div class="stage-title">Content Agent</div>
+            </div>
+            <div class="card animate-flow">
+              <div class="card-title">Available Tools</div>
+              <div class="card-desc">Agent autonomously selects tools:</div>
+              <div class="tools-grid" style="grid-template-columns: repeat(2, 1fr);">
+                <div class="tool-item">list_interviews</div>
+                <div class="tool-item">read_interview</div>
+                <div class="tool-item">list_ideas</div>
+                <div class="tool-item">read_idea</div>
+                <div class="tool-item">list_articles</div>
+                <div class="tool-item">search_articles</div>
+                <div class="tool-item">check_duplicate</div>
+                <div class="tool-item">create_draft</div>
+                <div class="tool-item">web_search</div>
+                <div class="tool-item">research_topic</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flow-arrow"><div class="arrow"></div></div>
+
+          <div class="flow-stage">
+            <div class="stage-header">
+              <div class="stage-icon output">&#10024;</div>
+              <div class="stage-title">Result</div>
+            </div>
+            <div class="card animate-flow">
+              <div class="card-title">Response</div>
+              <div class="card-desc">Information displayed or draft created, depending on the request</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="command-box">
+        <div class="command-line">
+          <span class="prompt">$</span>
+          <span class="command">npm run chat</span>
+        </div>
+        <div class="comment"># Opens interactive CLI for manual requests</div>
+      </div>
+    </div>
+
+    <!-- Data Flow Overview -->
+    <div class="workflow-panel" id="overview">
+      <div class="data-flow">
+        <h3>System Architecture</h3>
+
+        <div class="services-row">
+          <div class="service-box">
+            <div class="icon">&#128193;</div>
+            <div class="name">Google Drive</div>
+            <div class="desc">Interviews & Ideas</div>
+          </div>
+
+          <div class="connector">&#8594;</div>
+
+          <div class="service-box">
+            <div class="icon">&#127760;</div>
+            <div class="name">Tavily</div>
+            <div class="desc">Web Research</div>
+          </div>
+
+          <div class="connector">&#8594;</div>
+
+          <div class="service-box" style="border-color: #d4a5a5; background: #fdf6f6;">
+            <div class="icon">&#10022;</div>
+            <div class="name">Claude Agent</div>
+            <div class="desc">Content Generation</div>
+          </div>
+
+          <div class="connector">&#8594;</div>
+
+          <div class="service-box">
+            <div class="icon">&#128123;</div>
+            <div class="name">Ghost CMS</div>
+            <div class="desc">Draft Articles</div>
+          </div>
+        </div>
+
+        <div class="blocklist">
+          <h4>&#128683; Competitor Blocklist</h4>
+          <div class="blocklist-items">
+            <span class="blocklist-item">theknot.com</span>
+            <span class="blocklist-item">weddingwire.com</span>
+            <span class="blocklist-item">zola.com</span>
+            <span class="blocklist-item">brides.com</span>
+            <span class="blocklist-item">marthastewartweddings.com</span>
+            <span class="blocklist-item">weddingbee.com</span>
+            <span class="blocklist-item">junebugweddings.com</span>
+            <span class="blocklist-item">stylemepretty.com</span>
+            <span class="blocklist-item">greenweddingshoes.com</span>
+            <span class="blocklist-item">ruffledblog.com</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div style="text-align: center;">
+        <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 400; margin-bottom: 25px;">Quick Commands</h3>
+      </div>
+
+      <div class="command-box">
+        <div class="command-line">
+          <span class="prompt">$</span>
+          <span class="command">npm run daily</span>
+          <span class="comment" style="margin-left: 20px;"># New interviews & ideas</span>
+        </div>
+        <div class="command-line">
+          <span class="prompt">$</span>
+          <span class="command">npm run weekly</span>
+          <span class="comment" style="margin-left: 20px;"># SEO, theme, interview articles</span>
+        </div>
+        <div class="command-line">
+          <span class="prompt">$</span>
+          <span class="command">npm run chat</span>
+          <span class="comment" style="margin-left: 20px;"># Interactive CLI</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab switching
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const panels = document.querySelectorAll('.workflow-panel');
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabId = btn.dataset.tab;
+
+        // Update active states
+        tabBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        panels.forEach(p => p.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+
+        // Re-trigger animations
+        const cards = document.querySelectorAll(`#${tabId} .animate-flow`);
+        cards.forEach((card, i) => {
+          card.style.animation = 'none';
+          card.offsetHeight; // Trigger reflow
+          card.style.animation = `flowIn 0.5s ease forwards ${i * 0.1}s`;
+        });
+      });
+    });
+
+    // Card hover effects
+    document.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('mouseenter', () => {
+        card.style.borderColor = '#d4a5a5';
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.borderColor = '#e5e5e5';
+      });
+    });
+  </script>
+</body>
+</html>
