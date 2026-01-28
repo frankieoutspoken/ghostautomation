@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+.DS_Store
+*.log
+config/google-token.json
+config/processed-interviews.json
+config/processed-ideas.json
+config/week-counter.json

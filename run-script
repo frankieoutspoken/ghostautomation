@@ -1,0 +1,12 @@
+ Quick commands:                                                                                                                                       
+  - npm run deploy - Build & deploy code changes to Lambda                                                                                              
+  - npm run update-tools - Update tool schema in AgentCore Gateway (edit update-tools.sh to add new tools)                                              
+  - npm run mcp - Run local MCP server (for your Claude Desktop)                                                                                        
+                                                                                                                                                        
+  MCP URL:                                                                                                                                              
+  https://ghost-agent-gateway-t18kxjosdh.gateway.bedrock-agentcore.us-east-1.amazonaws.com/mcp                                                          
+                                                                                                                                                        
+  To add a new tool:                                                                                                                                    
+  1. Add the tool in src/mcp-server.ts                                                                                                                  
+  2. Edit update-tools.sh to include the new tool schema                                                                                                
+  3. Run npm run deploy then npm run update-tools 

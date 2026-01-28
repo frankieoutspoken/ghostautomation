@@ -1,0 +1,14 @@
+FROM public.ecr.aws/lambda/nodejs:20
+
+# Copy package files
+COPY package*.json ${LAMBDA_TASK_ROOT}/
+
+# Install production dependencies
+RUN npm ci --omit=dev
+
+# Copy built files and config
+COPY dist/ ${LAMBDA_TASK_ROOT}/dist/
+COPY config/prompts/ ${LAMBDA_TASK_ROOT}/config/prompts/
+
+# Set the handler
+CMD [ "dist/lambda-handler.handler" ]
