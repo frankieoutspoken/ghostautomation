@@ -65,7 +65,7 @@ export async function researchTopic(topic: string): Promise<string> {
   const context = results
     .map(
       (r, i) =>
-        `[Source ${i + 1}: ${r.source}]\n${r.title}\n${r.snippet}`
+        `[Source ${i + 1}: ${r.source}] (${r.url})\n${r.title}\n${r.snippet}`
     )
     .join('\n\n---\n\n');
 
@@ -94,7 +94,7 @@ export async function researchKeywords(keywords: string[]): Promise<string> {
     .slice(0, 8)
     .map(
       (r, i) =>
-        `[Source ${i + 1}: ${r.source}]\n${r.title}\n${r.snippet}`
+        `[Source ${i + 1}: ${r.source}] (${r.url})\n${r.title}\n${r.snippet}`
     )
     .join('\n\n---\n\n');
 

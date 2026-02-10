@@ -47,3 +47,20 @@ export function filterBlockedUrls<T extends { url: string }>(results: T[]): T[] 
 export function getBlockedDomains(): string[] {
   return loadBlocklist().domains;
 }
+
+/**
+ * Remove any links to blocked domains from generated HTML.
+ * Replaces <a> tags pointing to blocked domains with just their inner text.
+ */
+export function sanitizeBlockedLinks(html: string): string {
+  const config = loadBlocklist();
+  const domainPattern = config.domains.map(d => d.replace('.', '\\.')).join('|');
+  if (!domainPattern) return html;
+
+  // Remove <a> tags linking to blocked domains, keep inner text
+  const linkRegex = new RegExp(
+    `<a\\s[^>]*href=["'][^"']*(?:${domainPattern})[^"']*["'][^>]*>(.*?)<\\/a>`,
+    'gi'
+  );
+  return html.replace(linkRegex, '$1');
+}

@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { listInterviews, getInterview, listArticleIdeas, getIdea } from '../services/google-docs.js';
+import { listInterviews, getInterview, getAllInterviewsWithContent, listArticleIdeas, getIdea } from '../services/google-docs.js';
 import { getExistingArticles, searchExistingArticles, checkArticleExists, createDraftArticle } from '../services/ghost.js';
+import { sanitizeBlockedLinks } from '../utils/blocklist.js';
 import { generateSlug, generateMetaTitle, generateMetaDescription, suggestTags } from '../utils/metadata.js';
 import { searchWeb, researchTopic, initResearchService } from '../services/research.js';
 import { SYSTEM_PROMPT } from './system-prompt.js';
@@ -104,6 +105,17 @@ const tools: Anthropic.Tool[] = [
     },
   },
   {
+    name: 'search_interviews',
+    description: 'Search ALL interview documents for a keyword or topic. Returns matching snippets from every interview that mentions the search term, with vendor names and document IDs. Use this to find all relevant quotes across interviews before writing an article.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        query: { type: 'string', description: 'Keyword or topic to search for across all interviews (e.g. "AI", "pricing", "social media")' },
+      },
+      required: ['query'],
+    },
+  },
+  {
     name: 'list_ideas',
     description: 'List article ideas from the ideas folder in Google Drive. Each idea doc contains a topic/request like "Piece on AI - look for interview quotes".',
     input_schema: {
@@ -183,11 +195,12 @@ async function executeTool(name: string, input: Record<string, unknown>, folderI
     case 'create_draft': {
       const slug = generateSlug(input.title as string);
       const metaTitle = generateMetaTitle(input.title as string);
+      const sanitizedHtml = sanitizeBlockedLinks(input.html as string);
 
       const result = await createDraftArticle({
         title: input.title as string,
         slug,
-        html: input.html as string,
+        html: sanitizedHtml,
         excerpt: input.excerpt as string | undefined,
         metaTitle,
         metaDescription: input.metaDescription as string | undefined,
@@ -214,6 +227,46 @@ async function executeTool(name: string, input: Record<string, unknown>, folderI
     case 'research_topic': {
       const research = await researchTopic(input.topic as string);
       return research;
+    }
+
+    case 'search_interviews': {
+      const query = (input.query as string).toLowerCase();
+      const interviews = await getAllInterviewsWithContent(folderId);
+      const matches: Array<{ vendorName: string; documentId: string; snippets: string[] }> = [];
+
+      for (const interview of interviews) {
+        const contentLower = interview.content.toLowerCase();
+        if (!contentLower.includes(query)) continue;
+
+        // Extract snippets around each match (surrounding context)
+        const snippets: string[] = [];
+        const lines = interview.content.split('\n');
+        for (let i = 0; i < lines.length; i++) {
+          if (lines[i].toLowerCase().includes(query)) {
+            const start = Math.max(0, i - 1);
+            const end = Math.min(lines.length, i + 3);
+            snippets.push(lines.slice(start, end).join('\n').trim());
+          }
+        }
+
+        // Deduplicate overlapping snippets and limit
+        const uniqueSnippets = [...new Set(snippets)].slice(0, 5);
+
+        matches.push({
+          vendorName: interview.vendorName || interview.title,
+          documentId: interview.id,
+          snippets: uniqueSnippets,
+        });
+      }
+
+      if (matches.length === 0) {
+        return JSON.stringify({ message: `No interviews mention "${input.query}". Try broader search terms.`, matches: [] });
+      }
+
+      return JSON.stringify({
+        message: `Found ${matches.length} interview(s) mentioning "${input.query}"`,
+        matches,
+      }, null, 2);
     }
 
     case 'list_ideas': {

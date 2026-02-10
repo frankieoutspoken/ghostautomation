@@ -2,12 +2,29 @@ import Anthropic from '@anthropic-ai/sdk';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { sanitizeBlockedLinks } from '../utils/blocklist.js';
 import type { ArticleGenerationResult, Interview } from '../types/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 let anthropicClient: Anthropic | null = null;
+
+const ARTICLE_SYSTEM_PROMPT = `You are a content writer for Pretty Perspectives by Style Me Pretty.
+
+CRITICAL RULE - COMPETITOR BLOCKING:
+You must NEVER mention, reference, cite, quote, or link to any of these competitor publications:
+- The Knot (theknot.com)
+- WeddingWire (weddingwire.com)
+- Zola (zola.com)
+- Brides (brides.com)
+- Martha Stewart Weddings (marthastewartweddings.com)
+- WeddingBee (weddingbee.com)
+- Junebug Weddings (junebugweddings.com)
+- Green Wedding Shoes (greenweddingshoes.com)
+- Ruffled Blog (ruffledblog.com)
+
+If research context includes information from these sources, you may use the factual information but must NOT attribute it to them or link to them. When citing sources, only link to non-competitor publications.`;
 
 export function initAIClient(apiKey: string): void {
   anthropicClient = new Anthropic({ apiKey });
@@ -32,6 +49,7 @@ export async function generateInterviewArticle(
   const response = await anthropicClient.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 4096,
+    system: ARTICLE_SYSTEM_PROMPT,
     messages: [
       {
         role: 'user',
@@ -45,7 +63,9 @@ export async function generateInterviewArticle(
     throw new Error('Unexpected response type from Claude');
   }
 
-  return parseArticleResponse(content.text);
+  const result = parseArticleResponse(content.text);
+  result.article.html = sanitizeBlockedLinks(result.article.html);
+  return result;
 }
 
 export async function generateThemeArticle(
@@ -67,6 +87,7 @@ export async function generateThemeArticle(
   const response = await anthropicClient.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 4096,
+    system: ARTICLE_SYSTEM_PROMPT,
     messages: [
       {
         role: 'user',
@@ -80,7 +101,9 @@ export async function generateThemeArticle(
     throw new Error('Unexpected response type from Claude');
   }
 
-  return parseArticleResponse(content.text);
+  const result = parseArticleResponse(content.text);
+  result.article.html = sanitizeBlockedLinks(result.article.html);
+  return result;
 }
 
 export async function generateInsightArticle(
@@ -99,6 +122,7 @@ export async function generateInsightArticle(
   const response = await anthropicClient.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 4096,
+    system: ARTICLE_SYSTEM_PROMPT,
     messages: [
       {
         role: 'user',
@@ -112,7 +136,9 @@ export async function generateInsightArticle(
     throw new Error('Unexpected response type from Claude');
   }
 
-  return parseArticleResponse(content.text);
+  const result = parseArticleResponse(content.text);
+  result.article.html = sanitizeBlockedLinks(result.article.html);
+  return result;
 }
 
 export async function generateSEOArticle(
@@ -131,6 +157,7 @@ export async function generateSEOArticle(
   const response = await anthropicClient.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 4096,
+    system: ARTICLE_SYSTEM_PROMPT,
     messages: [
       {
         role: 'user',
@@ -144,7 +171,9 @@ export async function generateSEOArticle(
     throw new Error('Unexpected response type from Claude');
   }
 
-  return parseArticleResponse(content.text);
+  const result = parseArticleResponse(content.text);
+  result.article.html = sanitizeBlockedLinks(result.article.html);
+  return result;
 }
 
 export async function analyzeInterviewsForThemes(

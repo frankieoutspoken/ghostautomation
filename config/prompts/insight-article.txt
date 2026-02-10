@@ -68,7 +68,15 @@ Take this insightful quote/topic from a vendor interview and expand it into a re
 ## RESEARCH CONTEXT:
 {{research_context}}
 
-IMPORTANT: Do not reference competitor wedding publications.
+## SOURCE CITATION RULES:
+- When you reference facts, statistics, or insights from the research context, ALWAYS link to the original source using an HTML anchor tag: <a href="URL" target="_blank">Source Name</a>
+- Every claim backed by research should have a hyperlink to where readers can learn more
+- Use natural anchor text (e.g. "according to <a href="..." target="_blank">Vogue Business</a>") rather than raw URLs
+
+## COMPETITOR RESTRICTIONS (CRITICAL - NEVER VIOLATE):
+- NEVER reference, cite, link to, or mention these competitor publications in ANY way: The Knot, WeddingWire, Zola, Brides, Martha Stewart Weddings, WeddingBee, Junebug Weddings, Green Wedding Shoes, Ruffled Blog
+- If research context contains information from a competitor source, use the information but DO NOT cite or link to that source
+- Do not use phrases like "according to The Knot" or link to any competitor domain
 
 IMPORTANT: Start your response with these fields BEFORE the HTML:
 

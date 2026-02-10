@@ -3,7 +3,7 @@ import { checkArticleExists, createDraftArticle } from '../services/ghost.js';
 import { generateInterviewArticle } from '../services/ai.js';
 import { generateSlug, generateMetaTitle, generateMetaDescription, suggestTags } from '../utils/metadata.js';
 import type { Interview, GeneratorOptions, Article } from '../types/index.js';
-import { writeFileSync, readFileSync, existsSync } from 'fs';
+import { writeFileSync, readFileSync, existsSync, mkdirSync } from 'fs';
 
 // Cache generated content to ensure preview matches final upload
 const CACHE_DIR = '/tmp/ghost-agent-cache';
@@ -30,7 +30,6 @@ function getCachedArticle(documentId: string): { article: Article; excerpt: stri
 function cacheArticle(documentId: string, article: Article, excerpt: string): void {
   try {
     if (!existsSync(CACHE_DIR)) {
-      const { mkdirSync } = require('fs');
       mkdirSync(CACHE_DIR, { recursive: true });
     }
     writeFileSync(getCachePath(documentId), JSON.stringify({

@@ -181,18 +181,21 @@ Instructions: ${idea.content}
 
 ## Required Workflow
 1. **Check for duplicates first** - Use check_duplicate with the topic/title to make sure we haven't already written about this
-2. **Research the topic** - Use web_search to find current trends, statistics, and insights about this topic (search for "[topic] wedding industry 2026" or similar)
-3. **Read relevant interviews** - If the idea mentions quotes or interviews, use list_interviews then read_interview to find relevant vendor perspectives and quotes to include
-4. **Generate the article** - Write complete HTML following the Pretty Perspectives format:
+2. **Search ALL interviews for relevant quotes** - Use search_interviews with keywords related to the topic (e.g. for an AI article, search "AI", "artificial intelligence", "technology", "automation"). This returns matching snippets from every interview that mentions the topic. You MUST include quotes from ALL vendors who have relevant perspectives.
+3. **Read full interviews for context** - For each vendor returned by search_interviews, use read_interview to get fuller context around their quotes if the snippets aren't sufficient
+4. **Research the topic** - Use web_search to find current trends, statistics, and insights (search for "[topic] wedding industry 2026" or similar)
+5. **Generate the article** - Write complete HTML following the Pretty Perspectives format:
    - Start with TL;DR callout card
    - Include proper H2 sections with <hr> dividers
+   - Include quotes from EVERY vendor who had relevant insights - do NOT leave anyone out
    - Add image placeholders with photographer credits
    - Include the CTA block about 2/3 through
+   - When citing web research, link to the original source with <a href="URL" target="_blank">Source Name</a>
    - Use bullet lists for takeaways
    - End with "The Bottom Line" section
-5. **Create the draft** - Use create_draft with title, full HTML, excerpt, metaDescription, and tags
+6. **Create the draft** - Use create_draft with title, full HTML, excerpt, metaDescription, and tags
 
-Make sure to incorporate research findings and interview quotes (if applicable) into the article. Never fabricate statistics.`;
+CRITICAL: Include quotes/insights from ALL relevant vendors found in interviews. Do not cherry-pick just 1-2 vendors. Never fabricate statistics.`;
 
     try {
       const result = await runContentAgent(agentRequest, interviewsFolderId, ideasFolderId);
